@@ -535,7 +535,7 @@ footer{
           <span id="fileSize" class="status-badge loading">در حال بررسی فایل...</span>
         </div>
       </div>
-      <a href="https://raw.githubusercontent.com/USERNAME/REPOSITORY/main/katalog-compressed.pdf" download="katalog-compressed.pdf" id="downloadLink">
+      <a href="https://raw.githubusercontent.com/vnsh1368-nsh/katalog/main/katalog_zorof.pdf" download="katalog_zorof.pdf" id="downloadLink">
         <button class="success">دانلود کاتالوگ</button>
       </a>
     </section>
@@ -599,10 +599,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   const fileSizeEl = document.getElementById('fileSize');
   const downloadLink = document.getElementById('downloadLink');
 
-  // تعیین مسیر GitHub (اصلاح مورد نیاز)
-  const GITHUB_USERNAME = 'USERNAME'; // جایگزین کنید با نام کاربری GitHub
-  const GITHUB_REPO = 'REPOSITORY'; // جایگزین کنید با نام مخزن
-  const PDF_FILE = 'katalog-compressed.pdf';
+  // ⭐ اطلاعات GitHub
+  const GITHUB_USERNAME = 'vnsh1368-nsh';
+  const GITHUB_REPO = 'zorof';
+  const PDF_FILE = 'katalog_zorof.pdf';
   
   const githubRawUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/${PDF_FILE}`;
   const githubApiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${PDF_FILE}`;
