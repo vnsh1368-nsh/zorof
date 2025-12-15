@@ -226,6 +226,12 @@ button.danger:hover{
   box-shadow:0 12px 28px rgba(239,68,68,.4);
 }
 
+button.small{
+  padding:8px 16px;
+  font-size:0.9rem;
+  border-radius:12px;
+}
+
 .muted{
   color:var(--muted);
   font-size:.95rem;
@@ -330,7 +336,40 @@ textarea{
   }
 }
 
-#orderPreview{
+.cart-item{
+  background:linear-gradient(135deg, #f0f7ff 0%, #f5f3ff 50%, #f0fff9 100%);
+  border:2px solid #bfdbfe;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+.cart-item-info{
+  flex:1;
+  min-width:200px;
+}
+
+.cart-item-info p{
+  margin:6px 0;
+  font-size:1rem;
+}
+
+.cart-item-info strong{
+  color:var(--primary);
+  font-weight:700;
+}
+
+.cart-item-actions{
+  display:flex;
+  gap:8px;
+}
+
+#cartPreview{
   background:linear-gradient(135deg, #ecfeff 0%, #f0fdfa 50%, #e0f7f4 100%);
   border:2px solid #67e8f9 !important;
   margin-top:28px !important;
@@ -338,7 +377,7 @@ textarea{
   border-radius:var(--radius) !important;
 }
 
-#orderPreview h3{
+#cartPreview h3{
   margin-top:0;
   color:#0369a1;
   font-size:1.3rem;
@@ -348,7 +387,7 @@ textarea{
   gap:10px;
 }
 
-#orderPreview h3::before{
+#cartPreview h3::before{
   content:'✓';
   display:inline-flex;
   align-items:center;
@@ -362,7 +401,7 @@ textarea{
   font-size:1.1rem;
 }
 
-#orderPreview p{
+#cartPreview p{
   margin:12px 0;
   padding:10px 0;
   border-bottom:1px solid rgba(6, 182, 212, 0.2);
@@ -370,11 +409,11 @@ textarea{
   line-height:1.8;
 }
 
-#orderPreview p:last-child{
+#cartPreview p:last-child{
   border:none;
 }
 
-#orderPreview strong{
+#cartPreview strong{
   color:#0369a1;
   font-weight:700;
 }
@@ -417,6 +456,31 @@ footer{
   color:#7f1d1d;
 }
 
+.cart-count{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:24px;
+  height:24px;
+  background:#ef4444;
+  color:#fff;
+  border-radius:50%;
+  font-size:0.8rem;
+  font-weight:700;
+  margin-left:6px;
+}
+
+.empty-cart{
+  text-align:center;
+  padding:40px 20px;
+  color:var(--muted);
+}
+
+.empty-cart-icon{
+  font-size:3rem;
+  margin-bottom:16px;
+}
+
 @media(max-width:768px){
   header{
     padding:40px 20px;
@@ -456,6 +520,19 @@ footer{
     padding:14px 24px;
     font-size:1rem;
   }
+
+  .cart-item{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .cart-item-actions{
+    width:100%;
+  }
+
+  .cart-item-actions button{
+    flex:1;
+  }
 }
 
 @media(max-width:480px){
@@ -483,7 +560,6 @@ footer{
   }
 }
 
-/* Animation */
 @keyframes slideUp{
   from{
     opacity:0;
@@ -499,9 +575,8 @@ footer{
   animation:slideUp .5s ease-out;
 }
 
-/* Print Styles */
 @media print{
-  header, footer, .button-group, #orderSection > p{
+  header, footer, .button-group, #orderSection > p, .cart-item-actions{
     display:none;
   }
   
@@ -549,7 +624,7 @@ footer{
       </div>
     </section>
 
-    <!-- فرم ثبت سفارش دستی -->
+    <!-- فرم ثبت سفارش -->
     <section class="card" id="orderSection">
       <h2>📦 ثبت سفارش</h2>
       <p class="muted">نام کالای مورد نظر را مطابق کاتالوگ قرار داده شده در سایت وارد کنید</p>
@@ -573,14 +648,21 @@ footer{
         </div>
       </div>
 
+      <button id="addToCart" class="success">افزودن به سبد خرید</button>
+    </section>
+
+    <!-- سبد خرید -->
+    <section class="card" id="cartSection" style="display:none">
+      <h2>🛒 سبد خرید <span class="cart-count" id="cartCount">0</span></h2>
+      <div id="cartItems"></div>
+      
       <div class="button-group">
-        <button id="registerOrder" class="success">ثبت سفارش</button>
-        <button id="editOrder" class="secondary" style="display:none">✏️ ویرایش سفارش</button>
-        <button id="printOrder" class="secondary" style="display:none">🖨️ چاپ سفارش</button>
-        <button id="sendWhatsapp" class="success" disabled>📱 ارسال به واتس‌اپ</button>
+        <button id="printOrder" class="secondary">🖨️ چاپ سفارش</button>
+        <button id="clearCart" class="danger">🗑️ حذف همه</button>
+        <button id="sendWhatsapp" class="success">📱 ارسال به واتس‌اپ</button>
       </div>
 
-      <div id="orderPreview" style="display:none"></div>
+      <div id="cartPreview" style="display:none"></div>
     </section>
 
   </main>
@@ -591,13 +673,18 @@ footer{
 
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
-  const registerBtn = document.getElementById('registerOrder');
+  const addToCartBtn = document.getElementById('addToCart');
   const sendBtn = document.getElementById('sendWhatsapp');
-  const editBtn = document.getElementById('editOrder');
-  const printBtn = document.getElementById('printOrder');
-  const previewBox = document.getElementById('orderPreview');
+  const cartSection = document.getElementById('cartSection');
+  const cartItems = document.getElementById('cartItems');
+  const cartCount = document.getElementById('cartCount');
   const fileSizeEl = document.getElementById('fileSize');
   const downloadLink = document.getElementById('downloadLink');
+  const printBtn = document.getElementById('printOrder');
+  const clearCartBtn = document.getElementById('clearCart');
+  const cartPreview = document.getElementById('cartPreview');
+
+  let cart = [];
 
   // ⭐ اطلاعات GitHub
   const GITHUB_USERNAME = 'vnsh1368-nsh';
@@ -627,46 +714,101 @@ document.addEventListener('DOMContentLoaded',()=>{
       fileSizeEl.className = 'status-badge success';
     });
 
-  registerBtn.addEventListener('click',()=>{
-    const customer = document.getElementById('customerName').value.trim();
-    const product = document.getElementById('productName').value.trim();
-    const qty = document.getElementById('quantity').value;
-    const unit = document.getElementById('unit').value;
-
-    if(!customer || !product || !qty){
-      alert('لطفاً اطلاعات مشتری و سفارش را کامل وارد کنید');
+  function renderCart(){
+    if(cart.length === 0){
+      cartItems.innerHTML = '<div class="empty-cart"><div class="empty-cart-icon">📭</div><p>سبد خرید خالی است</p></div>';
+      cartSection.style.display = 'none';
       return;
     }
 
-    previewBox.innerHTML = `
-      <h3>خلاصه سفارش</h3>
-      <p><strong>👤 نام مشتری:</strong> ${customer}</p>
-      <p><strong>📦 نام کالا:</strong> ${product}</p>
-      <p><strong>📊 تعداد:</strong> ${qty} ${unit}</p>
-    `;
+    cartSection.style.display = 'block';
+    cartCount.textContent = cart.length;
 
-    previewBox.style.display='block';
-    sendBtn.disabled=false;
-    editBtn.style.display='inline-block';
-    printBtn.style.display='inline-block';
-    previewBox.scrollIntoView({behavior:'smooth'});
-  });
+    cartItems.innerHTML = cart.map((item, index) => `
+      <div class="cart-item">
+        <div class="cart-item-info">
+          <p><strong>📦 نام کالا:</strong> ${item.product}</p>
+          <p><strong>📊 تعداد:</strong> ${item.quantity} ${item.unit}</p>
+        </div>
+        <div class="cart-item-actions">
+          <button class="secondary small" onclick="editItem(${index})">✏️ ویرایش</button>
+          <button class="danger small" onclick="deleteItem(${index})">🗑️ حذف</button>
+        </div>
+      </div>
+    `).join('');
+  }
 
-  editBtn.addEventListener('click',()=>{
-    previewBox.style.display='none';
-    sendBtn.disabled=true;
-  });
+  window.editItem = (index) => {
+    const item = cart[index];
+    document.getElementById('productName').value = item.product;
+    document.getElementById('quantity').value = item.quantity;
+    document.getElementById('unit').value = item.unit;
+    deleteItem(index);
+    document.getElementById('productName').focus();
+  };
 
-  printBtn.addEventListener('click',()=>window.print());
+  window.deleteItem = (index) => {
+    cart.splice(index, 1);
+    renderCart();
+  };
 
-  sendBtn.addEventListener('click',()=>{
+  addToCartBtn.addEventListener('click', () => {
     const customer = document.getElementById('customerName').value.trim();
     const product = document.getElementById('productName').value.trim();
     const qty = document.getElementById('quantity').value;
     const unit = document.getElementById('unit').value;
 
-    const text = `سفارش جدید:%0A👤 نام مشتری: ${customer}%0A📦 کالا: ${product}%0A📊 تعداد: ${qty} ${unit}`;
-    window.open(`https://wa.me/989374657597?text=${text}`,'_blank');
+    if(!customer){
+      alert('لطفاً نام مشتری را وارد کنید');
+      return;
+    }
+
+    if(!product || !qty){
+      alert('لطفاً نام کالا و تعداد را وارد کنید');
+      return;
+    }
+
+    cart.push({
+      product: product,
+      quantity: qty,
+      unit: unit
+    });
+
+    document.getElementById('productName').value = '';
+    document.getElementById('quantity').value = '';
+
+    renderCart();
+  });
+
+  clearCartBtn.addEventListener('click', () => {
+    if(confirm('آیا می‌خواهید تمام کالاها را حذف کنید؟')){
+      cart = [];
+      renderCart();
+      cartPreview.style.display = 'none';
+    }
+  });
+
+  printBtn.addEventListener('click', () => window.print());
+
+  sendBtn.addEventListener('click', () => {
+    const customer = document.getElementById('customerName').value.trim();
+
+    if(!customer){
+      alert('لطفاً نام مشتری را وارد کنید');
+      return;
+    }
+
+    if(cart.length === 0){
+      alert('سبد خرید خالی است');
+      return;
+    }
+
+    let text = `سفارش جدید:%0A👤 نام مشتری: ${customer}%0A`;
+    cart.forEach((item, index) => {
+      text += `%0A📦 کالای ${index + 1}: ${item.product}%0A   تعداد: ${item.quantity} ${item.unit}`;
+    });
+
+    window.open(`https://wa.me/989374657597?text=${text}`, '_blank');
   });
 });
 </script>
